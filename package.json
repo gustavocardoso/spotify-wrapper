@@ -1,7 +1,7 @@
 {
-  "name": "js-tdd",
+  "name": "spotify-wrapper",
   "version": "1.0.0",
-  "description": "JS TDD course",
+  "description": "A wrapper to work with Spotify Web API",
   "main": "index.js",
   "scripts": {
     "lint": "./node_modules/.bin/eslint src/*.js",
@@ -28,8 +28,13 @@
     "tdd",
     "tests"
   ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gustavocardoso/spotify-wrapper"
+  },
+  "homepage": "https://github.com/gustavocardoso/spotify-wrapper#readme",
   "author": "Gustavo Cardoso",
-  "license": "ISC",
+  "license": "MIT",
   "devDependencies": {
     "babel-preset-env": "^1.7.0",
     "babel-register": "^6.26.0",
