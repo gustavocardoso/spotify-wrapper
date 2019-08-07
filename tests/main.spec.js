@@ -1,83 +1,177 @@
-import { expect } from 'chai'
-import { sum, sub, mult, div } from '../src/main'
+import chai, { expect } from 'chai'
+import sinon from 'sinon'
+import sinonChai from 'sinon-chai'
 
-describe('Calc', () => {
-  // smoke tests
-  describe('Smoke tests', () => {
-    it('should exist the method sum', () => {
-      expect(sum).to.exist
-      expect(sum).to.be.a('function')
-    })
+import {
+  search,
+  searchAlbums,
+  searchArtists,
+  searchTracks,
+  searchPlayLists
+} from '../src/main'
 
-    it('should exist the method sub', () => {
-      expect(sub).to.exist
-      expect(sub).to.be.a('function')
-    })
+chai.use(sinonChai)
 
-    it('should exist the method mult', () => {
-      expect(mult).to.exist
-      expect(mult).to.be.a('function')
-    })
+global.fetch = require('node-fetch')
 
-    it('should exist the method div', () => {
-      expect(div).to.exist
-      expect(div).to.be.a('function')
-    })
-  })
+describe('Spotify Wrapper', () => {
+  let fetchedStub
+  let promise
 
-  describe('Sum', () => {
-    it('should return 4 when sum(2, 2)', () => {
-      expect(sum(2, 2)).to.be.equal(4)
-    })
-
-    it('should return 6 when sum(2, 4)', () => {
-      expect(sum(2, 4)).to.be.equal(6)
+  beforeEach(() => {
+    fetchedStub = sinon.stub(global, 'fetch')
+    promise = fetchedStub.resolves({
+      json: () => ({
+        body: 'json'
+      })
     })
   })
 
-  describe('Sub', () => {
-    it('should return 4 when sub(8, 4)', () => {
-      expect(sub(8, 4)).to.be.equal(4)
+  afterEach(() => {
+    fetchedStub.restore()
+  })
+
+  describe('Smoke Tests', () => {
+    // search (generic) - more than one type
+    // searcHAlbums
+    // searchArtists
+    // searchTracks
+    // searchPlayLists
+
+    it('should exist the search method', () => {
+      expect(search).to.exist
     })
 
-    it('should return 6 when sub(12, 6)', () => {
-      expect(sub(12, 6)).to.be.equal(6)
+    it('should exist the searchAlbums method', () => {
+      expect(searchAlbums).to.exist
     })
 
-    it('should return -6 when sub(6, 12)', () => {
-      expect(sub(6, 12)).to.be.equal(-6)
+    it('should exist the searchArtists method', () => {
+      expect(searchArtists).to.exist
+    })
+
+    it('should exist the searchTracks method', () => {
+      expect(searchTracks).to.exist
+    })
+
+    it('should exist the searchPlayLists method', () => {
+      expect(searchPlayLists).to.exist
     })
   })
 
-  describe('Mult', () => {
-    it('should return 4 when mult(2, 2)', () => {
-      expect(mult(2, 2)).to.be.equal(4)
+  describe('Generic Search', () => {
+    it('should call the fetch method', () => {
+      const artist = search()
+
+      expect(fetchedStub).to.have.been.calledOnce
     })
 
-    it('should return 6 when mult(2, 3)', () => {
-      expect(mult(2, 3)).to.be.equal(6)
+    it('should call fetch with the correct URL', () => {
+      context('passing one type', () => {
+        const artist = search('Ghost', 'artist')
+
+        expect(fetchedStub).to.have.been.calledWith(
+          'https://api.spotify.com/v1/search?q=Ghost&type=artist'
+        )
+
+        const albums = search('Ghost', 'album')
+
+        expect(fetchedStub).to.have.been.calledWith(
+          'https://api.spotify.com/v1/search?q=Ghost&type=album'
+        )
+      })
+
+      context('passing more than one type', () => {
+        const artistAndAlbums = search('Ghost', ['artist', 'album'])
+
+        expect(fetchedStub).to.have.been.calledWith(
+          'https://api.spotify.com/v1/search?q=Ghost&type=artist,album'
+        )
+      })
     })
 
-    it('should return -6 when mult(-3, 2)', () => {
-      expect(mult(-3, 2)).to.be.equal(-6)
+    it('should return the JSON data from the promise', () => {
+      const artist = search('Ghost', 'artist')
+
+      artist.then(data => {
+        expect(data).to.be.eql({ body: 'json' })
+      })
     })
   })
 
-  describe('Div', () => {
-    it('should return 4 when div(8, 2)', () => {
-      expect(div(8, 2)).to.be.equal(4)
+  describe('searchArtists', () => {
+    it('should call fetch function', () => {
+      const artists = searchArtists('Ghost')
+      expect(fetchedStub).to.have.been.calledOnce
     })
 
-    it('should return 6 when div(12, 2)', () => {
-      expect(div(12, 2)).to.be.equal(6)
+    it('should call fetch with the correct URL', () => {
+      const artist = searchArtists('Ghost')
+      expect(fetchedStub).to.have.been.calledWith(
+        'https://api.spotify.com/v1/search?q=Ghost&type=artist'
+      )
+
+      const artist2 = searchArtists('Beatles')
+      expect(fetchedStub).to.have.been.calledWith(
+        'https://api.spotify.com/v1/search?q=Beatles&type=artist'
+      )
+    })
+  })
+
+  describe('searchAlbums', () => {
+    it('should call fetch function', () => {
+      const albums = searchAlbums('Ghost')
+      expect(fetchedStub).to.have.been.calledOnce
     })
 
-    it('should return -6 when div(-12, 2)', () => {
-      expect(div(-12, 2)).to.be.equal(-6)
+    it('should call fetch with the correct URL', () => {
+      const albums = searchAlbums('Ghost')
+      expect(fetchedStub).to.have.been.calledWith(
+        'https://api.spotify.com/v1/search?q=Ghost&type=album'
+      )
+
+      const albums2 = searchAlbums('Beatles')
+      expect(fetchedStub).to.have.been.calledWith(
+        'https://api.spotify.com/v1/search?q=Beatles&type=album'
+      )
+    })
+  })
+
+  describe('searchTracks', () => {
+    it('should call fetch function', () => {
+      const tracks = searchTracks('Ghost')
+      expect(fetchedStub).to.have.been.calledOnce
     })
 
-    it('should return "Impossible to divide by 0" when div(2, 0)', () => {
-      expect(div(2, 0)).to.be.equal('Impossible to divide by 0')
+    it('should call fetch with the correct URL', () => {
+      const tracks = searchTracks('Ghost')
+      expect(fetchedStub).to.have.been.calledWith(
+        'https://api.spotify.com/v1/search?q=Ghost&type=track'
+      )
+
+      const tracks2 = searchTracks('Beatles')
+      expect(fetchedStub).to.have.been.calledWith(
+        'https://api.spotify.com/v1/search?q=Beatles&type=track'
+      )
+    })
+  })
+
+  describe('searchPlayLists', () => {
+    it('should call fetch function', () => {
+      const playLists = searchTracks('Ghost')
+      expect(fetchedStub).to.have.been.calledOnce
+    })
+
+    it('should call fetch with the correct URL', () => {
+      const playLists = searchPlayLists('Ghost')
+      expect(fetchedStub).to.have.been.calledWith(
+        'https://api.spotify.com/v1/search?q=Ghost&type=playlist'
+      )
+
+      const playLists2 = searchPlayLists('Beatles')
+      expect(fetchedStub).to.have.been.calledWith(
+        'https://api.spotify.com/v1/search?q=Beatles&type=playlist'
+      )
     })
   })
 })

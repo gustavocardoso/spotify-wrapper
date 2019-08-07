@@ -1,9 +1,20 @@
-const sum = (num1, num2) => num1 + num2
+import { API_URL, HEADERS } from '../src/config'
+import { toJSON } from '../src/utils'
 
-const sub = (num1, num2) => num1 - num2
+export const search = (query, type) => {
+  return fetch(`${API_URL}/search?q=${query}&type=${type}`, HEADERS).then(toJSON)
+}
 
-const mult = (num1, num2) => num1 * num2
+export const searchArtists = query => {
+  return search(query, 'artist')
+}
 
-const div = (num1, num2) => (num2 === 0 ? 'Impossible to divide by 0' : num1 / num2)
-
-export { sum, sub, mult, div }
+export const searchAlbums = query => {
+  return search(query, 'album')
+}
+export const searchTracks = query => {
+  return search(query, 'track')
+}
+export const searchPlayLists = query => {
+  return search(query, 'playlist')
+}
