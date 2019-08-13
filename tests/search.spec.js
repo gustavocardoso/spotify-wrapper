@@ -2,23 +2,22 @@ import chai, { expect } from 'chai'
 import sinon from 'sinon'
 import sinonChai from 'sinon-chai'
 
-import {
-  search,
-  searchAlbums,
-  searchArtists,
-  searchTracks,
-  searchPlayLists
-} from '../src/main'
+import SpotifyWrapper from '../src/index'
 
 chai.use(sinonChai)
 
 global.fetch = require('node-fetch')
 
 describe('Spotify Wrapper', () => {
+  let spotify
   let fetchedStub
   let promise
 
   beforeEach(() => {
+    spotify = new SpotifyWrapper({
+      token: 'foo'
+    })
+
     fetchedStub = sinon.stub(global, 'fetch')
     promise = fetchedStub.resolves({
       json: () => ({
@@ -38,80 +37,36 @@ describe('Spotify Wrapper', () => {
     // searchTracks
     // searchPlayLists
 
-    it('should exist the search method', () => {
-      expect(search).to.exist
-    })
-
     it('should exist the searchAlbums method', () => {
-      expect(searchAlbums).to.exist
+      expect(spotify.search.albums).to.exist
     })
 
     it('should exist the searchArtists method', () => {
-      expect(searchArtists).to.exist
+      expect(spotify.search.artists).to.exist
     })
 
     it('should exist the searchTracks method', () => {
-      expect(searchTracks).to.exist
+      expect(spotify.search.tracks).to.exist
     })
 
     it('should exist the searchPlayLists method', () => {
-      expect(searchPlayLists).to.exist
-    })
-  })
-
-  describe('Generic Search', () => {
-    it('should call the fetch method', () => {
-      const artist = search()
-
-      expect(fetchedStub).to.have.been.calledOnce
-    })
-
-    it('should call fetch with the correct URL', () => {
-      context('passing one type', () => {
-        const artist = search('Ghost', 'artist')
-
-        expect(fetchedStub).to.have.been.calledWith(
-          'https://api.spotify.com/v1/search?q=Ghost&type=artist'
-        )
-
-        const albums = search('Ghost', 'album')
-
-        expect(fetchedStub).to.have.been.calledWith(
-          'https://api.spotify.com/v1/search?q=Ghost&type=album'
-        )
-      })
-
-      context('passing more than one type', () => {
-        const artistAndAlbums = search('Ghost', ['artist', 'album'])
-
-        expect(fetchedStub).to.have.been.calledWith(
-          'https://api.spotify.com/v1/search?q=Ghost&type=artist,album'
-        )
-      })
-    })
-
-    it('should return the JSON data from the promise', () => {
-      const artist = search('Ghost', 'artist')
-
-      artist.then(data => {
-        expect(data).to.be.eql({ body: 'json' })
-      })
+      expect(spotify.search.playlists).to.exist
     })
   })
 
   describe('searchArtists', () => {
     it('should call fetch function', () => {
-      const artists = searchArtists('Ghost')
+      const artists = spotify.search.artists('Ghost')
       expect(fetchedStub).to.have.been.calledOnce
     })
 
     it('should call fetch with the correct URL', () => {
-      const artist = searchArtists('Ghost')
+      const artist = spotify.search.artists('Ghost')
       expect(fetchedStub).to.have.been.calledWith(
         'https://api.spotify.com/v1/search?q=Ghost&type=artist'
       )
 
-      const artist2 = searchArtists('Beatles')
+      const artist2 = spotify.search.artists('Beatles')
       expect(fetchedStub).to.have.been.calledWith(
         'https://api.spotify.com/v1/search?q=Beatles&type=artist'
       )
@@ -120,17 +75,17 @@ describe('Spotify Wrapper', () => {
 
   describe('searchAlbums', () => {
     it('should call fetch function', () => {
-      const albums = searchAlbums('Ghost')
+      const albums = spotify.search.albums('Ghost')
       expect(fetchedStub).to.have.been.calledOnce
     })
 
     it('should call fetch with the correct URL', () => {
-      const albums = searchAlbums('Ghost')
+      const albums = spotify.search.albums('Ghost')
       expect(fetchedStub).to.have.been.calledWith(
         'https://api.spotify.com/v1/search?q=Ghost&type=album'
       )
 
-      const albums2 = searchAlbums('Beatles')
+      const albums2 = spotify.search.albums('Beatles')
       expect(fetchedStub).to.have.been.calledWith(
         'https://api.spotify.com/v1/search?q=Beatles&type=album'
       )
@@ -139,17 +94,17 @@ describe('Spotify Wrapper', () => {
 
   describe('searchTracks', () => {
     it('should call fetch function', () => {
-      const tracks = searchTracks('Ghost')
+      const tracks = spotify.search.tracks('Ghost')
       expect(fetchedStub).to.have.been.calledOnce
     })
 
     it('should call fetch with the correct URL', () => {
-      const tracks = searchTracks('Ghost')
+      const tracks = spotify.search.tracks('Ghost')
       expect(fetchedStub).to.have.been.calledWith(
         'https://api.spotify.com/v1/search?q=Ghost&type=track'
       )
 
-      const tracks2 = searchTracks('Beatles')
+      const tracks2 = spotify.search.tracks('Beatles')
       expect(fetchedStub).to.have.been.calledWith(
         'https://api.spotify.com/v1/search?q=Beatles&type=track'
       )
@@ -158,17 +113,17 @@ describe('Spotify Wrapper', () => {
 
   describe('searchPlayLists', () => {
     it('should call fetch function', () => {
-      const playLists = searchTracks('Ghost')
+      const playLists = spotify.search.playlists('Ghost')
       expect(fetchedStub).to.have.been.calledOnce
     })
 
     it('should call fetch with the correct URL', () => {
-      const playLists = searchPlayLists('Ghost')
+      const playLists = spotify.search.playlists('Ghost')
       expect(fetchedStub).to.have.been.calledWith(
         'https://api.spotify.com/v1/search?q=Ghost&type=playlist'
       )
 
-      const playLists2 = searchPlayLists('Beatles')
+      const playLists2 = spotify.search.playlists('Beatles')
       expect(fetchedStub).to.have.been.calledWith(
         'https://api.spotify.com/v1/search?q=Beatles&type=playlist'
       )

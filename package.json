@@ -43,6 +43,9 @@
     "type": "git",
     "url": "git+https://github.com/gustavocardoso/spotify-wrapper"
   },
+  "resolutions": {
+    "babel-core": "^7.0.0-bridge"
+  },
   "homepage": "https://github.com/gustavocardoso/spotify-wrapper#readme",
   "author": "Gustavo Cardoso",
   "license": "MIT",
@@ -52,6 +55,7 @@
     "@babel/preset-env": "^7.5.5",
     "@babel/register": "^7.5.5",
     "babel-loader": "^8.0.6",
+    "babel-register": "^6.26.0",
     "chai": "^4.2.0",
     "coveralls": "^3.0.6",
     "eslint": "^6.0.1",
